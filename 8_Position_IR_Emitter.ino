@@ -21,7 +21,7 @@ void xmitCodeHeader();
 #define btnSELECT 4                       // Select button (used to select a route)
 #define btnNONE   5                       // No button (not used currently)
 #define TIMEOUT 1000                      // Timeout counter time (in cycles, not milliseconds)
-#define PIN       3                       // This is the pin the IR LED is connected to
+#define PIN       3                       // This is the PD # the IR LED is connected to,
 unsigned int IRtimemicroseconds;          // Define the IRtimemicroseonds variable
 int timeOutCounter = 0;                   // Used through out the setup mode section
 int lcd_key     = 0;                      // used by the selectRouteInterface function
