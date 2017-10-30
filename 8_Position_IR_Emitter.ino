@@ -170,7 +170,15 @@ switch (selectedRoute)  // This will allow the routes to be cycled through
 
   timeOutCounter = 0;              // Set couter to zero
   selectButtonFlag = 0;            // Set flag to zero for setup mode
-  do // The following loop provides the user selection interface during a programming event
+  
+  /* ***************************************************************************
+ *  To provide the device with a route selection interface, the SAINSMART LCD 
+ *  sheld is used with an Arduino. This provides a decent display output for what
+ *  route is being transmitted and shows an activity marker. The buttons on the 
+ *  shield are used to enter into a "setup" mode and allow the a user to scroll 
+ *  through the available 8 preprogramed routes and select one to transmit.
+*******************************************************************************/
+  do // The following loop provides the route selection interface during a programming event
   {                    
        if (selectButtonFlag == 1)  //break out of the select route loop
        {
@@ -225,6 +233,10 @@ switch (selectedRoute)  // This will allow the routes to be cycled through
 
    _delay_ms(1000);                       //wait 1 second before repeating the sent code
 
+/* ***************************************************************************
+ *  The following implementation is an activity mark on the second line of the 
+ *  LCD that shows a tic mark every second.
+*******************************************************************************/
    if(scroll < 14)
    {
    lcd.setCursor(scroll,1);               // move to the begining of the second line
