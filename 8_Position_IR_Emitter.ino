@@ -1,10 +1,10 @@
-//*******************************************************************************
-// Created: 10/25/2017 
-// Author: Bradford Henson
-// License: Use at your own risk
-//
-// The below code uses pin 3 on the Arduino as the output pin for the IR LED
-//*******************************************************************************
+/*******************************************************************************
+* Created: 10/25/2017 
+* Author: Bradford Henson
+* License: Use at your own risk
+*
+* The below code uses pin 3 on the Arduino as the output pin for the IR LED
+*******************************************************************************/
 
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -61,13 +61,13 @@ void loop()
   lcd.setCursor(13,0);             // Set cursor to position 13 in the first row
   lcd.print(selectedRoute);        // Specify that route one is transmitting     
 
-/* ***************************************************************************
+ /* ***************************************************************************
  *  The following implementation is a brute force PWM. At this stage the CPU
  *  doesn't have anything else to do, so this method is okay. If there were 
  *  other things to do, it would be better to impletment the PWM in hardware
  *  utilizing one of the on chip timers. The advantage of doing it this way, 
  *  is that someone looking at the code can more easily see what is being done.
-*******************************************************************************/
+ ******************************************************************************/
 switch (selectedRoute)  // This will allow the routes to be cycled through
   {
     case 1:                       // Location A-0 B-0 C-0
@@ -159,7 +159,11 @@ switch (selectedRoute)  // This will allow the routes to be cycled through
       IRcarrier(BITtime);         // send a single STOP bit.
       break;                                  
   }
-  
+ /* ***************************************************************************
+ *  To enter into the setup menu, the user just has to hold down the UP button
+ *  on the LCD shield. This isn't the best implementation, as setting up an
+ *  interrupt that triggers an ISR for entering the setup menu would be better.
+ *******************************************************************************/  
   if (read_LCD_buttons() == btnUP) // Enter into setup mode by holding the UP button
   {
    lcd.setCursor(0,0);             // move to the begining of the second line
@@ -172,12 +176,12 @@ switch (selectedRoute)  // This will allow the routes to be cycled through
   selectButtonFlag = 0;            // Set flag to zero for setup mode
   
   /* ***************************************************************************
- *  To provide the device with a route selection interface, the SAINSMART LCD 
- *  sheld is used with an Arduino. This provides a decent display output for what
- *  route is being transmitted and shows an activity marker. The buttons on the 
- *  shield are used to enter into a "setup" mode and allow the a user to scroll 
- *  through the available 8 preprogramed routes and select one to transmit.
-*******************************************************************************/
+  *  To provide the device with a route selection interface, the SAINSMART LCD 
+  *  sheld is used with an Arduino. This provides a decent display output for what
+  *  route is being transmitted and shows an activity marker. The buttons on the 
+  *  shield are used to enter into a "setup" mode and allow the a user to scroll 
+  *  through the available 8 preprogramed routes and select one to transmit.
+  *******************************************************************************/
   do // The following loop provides the route selection interface during a programming event
   {                    
        if (selectButtonFlag == 1)  //break out of the select route loop
@@ -233,10 +237,10 @@ switch (selectedRoute)  // This will allow the routes to be cycled through
 
    _delay_ms(1000);                       //wait 1 second before repeating the sent code
 
-/* ***************************************************************************
+ /* ***************************************************************************
  *  The following implementation is an activity mark on the second line of the 
  *  LCD that shows a tic mark every second.
-*******************************************************************************/
+ ******************************************************************************/
    if(scroll < 14)
    {
    lcd.setCursor(scroll,1);               // move to the begining of the second line
