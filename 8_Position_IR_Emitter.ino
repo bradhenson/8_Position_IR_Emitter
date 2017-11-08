@@ -1,10 +1,10 @@
-//*******************************************************************************
-// Created: 10/25/2017 
-// Author: Bradford Henson
-// License: Use at your own risk
-//
-// The below code uses pin 3 on the Arduino as the output pin for the IR LED
-//*******************************************************************************
+/***************************************************************************
+ Created: 10/25/2017 
+ Author: Bradford Henson
+ License: Use at your own risk
+
+ The below code uses pin 3 on the Arduino as the output pin for the IR LED
+***************************************************************************/
 #define F_CPU 16000000UL
 
 #include <Arduino.h>
@@ -35,7 +35,9 @@ boolean selectButtonFlag = 0;             // Used in the setup mode section
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 /***************************************************************************
+                            
                             SETUP SECTION
+                            
 ***************************************************************************/
 void setup()
 {
@@ -47,7 +49,9 @@ void setup()
 }
 
 /***************************************************************************
-                                EVENT LOOP
+                               
+                             EVENT LOOP
+                                
 ***************************************************************************/
 void loop()                           
 {
@@ -247,7 +251,9 @@ switch (selectedRoute)  // This will allow the routes to be cycled through
 }
 
 /***************************************************************************
+                            
                             FUNCTIONS SECTION
+                            
 ***************************************************************************/
 
 int read_LCD_buttons()
