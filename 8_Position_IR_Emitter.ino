@@ -5,15 +5,15 @@
 //
 // The below code uses pin 3 on the Arduino as the output pin for the IR LED
 //*******************************************************************************
+#define F_CPU 16000000UL
 
-#include <avr/io.h>
-#include <util/delay.h>
 #include <Arduino.h>
 #include <LiquidCrystal.h>
+#include <util/delay.h>
 
-void IRcarrier();
-int read_LCD_buttons();
-void xmitCodeHeader();
+void IRcarrier(void);
+int read_LCD_buttons(int);
+void xmitCodeHeader(void);
 
 #define BITtime   560                     // carrier signal standard time
 #define btnRIGHT  0                       // Right button (not used currently)
@@ -23,8 +23,7 @@ void xmitCodeHeader();
 #define btnSELECT 4                       // Select button (used to select a route)
 #define btnNONE   5                       // No button (not used currently)
 #define TIMEOUT 1000                      // Timeout counter time (in cycles, not milliseconds)
-#define pinPOSITION  3                    // This is the pin the IR LED is connected to
-//unsigned int IRtimemicroseconds;          // Define the IRtimemicroseonds variable
+#define PIN       3                       // This is the pin the IR LED is connected to
 int timeOutCounter = 0;                   // Used through out the setup mode section
 int lcd_key     = 0;                      // used by the selectRouteInterface function
 int adc_key_in  = 0;                      // used to identify which button has been pressed
@@ -36,46 +35,19 @@ boolean selectButtonFlag = 0;             // Used in the setup mode section
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 /***************************************************************************
-
                             SETUP SECTION
-
 ***************************************************************************/
 void setup()
 {
- /**************************************************************************
- *PIN Number 3 on the Arduino board is bit position 4 in the DDRD and PORTD  
- *registries. This is also the PWM pin that is tied to OC2B register, which 
- *is what will be set in the TCCR2A register as the output pin for the PWM  
- *signal.
- **************************************************************************/
-  DDRB |= (1 << pinPOSITION);              // Set pin x in PortB as an output
-  PORTB |= (0 << pinPOSITION);            // Set pin x in PortB to 0
-  
- /**************************************************************************
- * A Fast PWM with Timer 1 is used to generate the carrier frequency.
- * By using the Fast PWM on Timer 1, the TOP value can be 
- * controlled by setting TOP = to ICR1 registry. 
- * 
- * In this case we change the TOP value to a value of 53 (0x35). The Frequency 
- * is Freq = F_CPU/1/OCR2B ===> 16000000/1/421 = 38000 Hz, which is needed by 
- * the IR receiver.
- **************************************************************************/
-  TCCR1A |= (1 << COM1B1);                // PWM output on OC1B
-  TCCR1A |= (1 << WGM11);                 // Fast PWM mode Setting 1
-  TCCR1B |= (1 << WGM12);                 // Fast PWM mode Setting 2
-  TCCR1B |= (1 << WGM13);                 // Fast PWM mode Setting 3
-  TCCR1B |= (1 << CS10);                  // PWM Freq = F_CPU/8/OCR2B
-  ICR1 = 0x1A5;                           // TOP value is set to 421
-  
+  DDRD = (1 << PIN);                        // Set pin 5 in PortD as an output
+  PORTD &= ~(0 << PIN);                      // Set pin 5 in PortD to 0
   lcd.begin(16, 2);                       // start the library
   lcd.setCursor(0,1);                     // Set cursor to position zero on the second row
-  lcd.clear();                            // Clears the LCD row
+  lcd.print(F("                "));       // Clears the LCD row
 }
 
 /***************************************************************************
-
                                 EVENT LOOP
-
 ***************************************************************************/
 void loop()                           
 {
@@ -94,91 +66,92 @@ void loop()
 switch (selectedRoute)  // This will allow the routes to be cycled through
   {
     case 1:                       // Location A-0 B-0 C-0
-      xmitCodeHeader();               
-      IRcarrier();         // turn on the carrier for one bit time
+      xmitCodeHeader();      
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period   
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period
-      IRcarrier();         // send a single STOP bit.      
+      IRcarrier(BITtime);         // send a single STOP bit.
       break;
     
     case 2:                       //Location A-0 B-0 C-1
       xmitCodeHeader();      
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period      
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods      
-      IRcarrier();         // send a single STOP bit.            
+      IRcarrier(BITtime);         // send a single STOP bit.            
       break;
       
     case 3:                       // Location A-0 B-1 C-0
       xmitCodeHeader();
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods   
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period      
-      IRcarrier();         // send a single STOP bit.
+      IRcarrier(BITtime);         // send a single STOP bit.
       break;
       
     case 4:                       // Location A-0 B-1 C-1
-      xmitCodeHeader(); 
-      IRcarrier();         // turn on the carrier for one bit time
+      xmitCodeHeader();
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods    
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods            
-      IRcarrier();         // send a single STOP bit.
+      IRcarrier(BITtime);         // send a single STOP bit.
       break;
       
     case 5:                       // Location A-1 B-0 C-0
       xmitCodeHeader();
-      IRcarrier();         // turn on the carrier for one bit time
+
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period    
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period            
-      IRcarrier();         // send a single STOP bit.
+      IRcarrier(BITtime);         // send a single STOP bit.
       break;
       
     case 6:                       // Location A-1 B-0 C-1
       xmitCodeHeader();
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period    
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods            
-      IRcarrier();         // send a single STOP bit.
+      IRcarrier(BITtime);         // send a single STOP bit.
       break;
       
     case 7:                       // Location A-1 B-1 C-0
       xmitCodeHeader();
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods    
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period            
-      IRcarrier();         // send a single STOP bit.
+      IRcarrier(BITtime);         // send a single STOP bit.
       break;
       
     case 8:                       // Location A-1 B-1 C-1
       xmitCodeHeader();
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods    
-      IRcarrier();         // turn on the carrier for one bit time
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(3 * BITtime);     // a HIGH is 3 bit time periods            
-      IRcarrier();         // send a single STOP bit.
+      IRcarrier(BITtime);         // send a single STOP bit.
       break;                                  
   }
   
@@ -274,9 +247,7 @@ switch (selectedRoute)  // This will allow the routes to be cycled through
 }
 
 /***************************************************************************
-
                             FUNCTIONS SECTION
-
 ***************************************************************************/
 
 int read_LCD_buttons()
@@ -293,6 +264,17 @@ int read_LCD_buttons()
   if (adc_key_in < 850)  return btnSELECT;
 
   return btnNONE;  // when all others fail, return this...
+}
+
+void IRcarrier(unsigned int timeinus)
+{
+  for(int i=0; i < (timeinus / 13); i++)
+  {
+    PORTD |= (1 << PIN);          // turn on Arduino pin
+    _delay_us(13);                //delay for 13us
+    PORTD &= ~(1 << PIN);         // turn off Arduino pin
+    _delay_us(13);                //delay for 13us
+  }
 }
 
  void selectRouteInterface(uint8_t route)
@@ -338,25 +320,20 @@ int read_LCD_buttons()
    }
    return;
  }
- 
- void IRcarrier()
-{
-  PORTB |= (1 << pinPOSITION);            // Set Arduino Pin 10 to HIGH
-  _delay_us(BITtime);
-  PORTB |= (0 << pinPOSITION);            // Set Arduino Pin 10 to LOW
-}
 
  void xmitCodeHeader()
  {
-      PORTB |= (1 << pinPOSITION);            // Set Arduino Pin 10 to HIGH
-      _delay_us(9000);
-      PORTB |= (0 << pinPOSITION);            // Set Arduino Pin 10 to LOW
-      _delay_us(4500);
-      for(uint8_t i = 0; i < 5; i++)
-      {
-        IRcarrier();         // turn on the carrier for one bit time
-        _delay_us(BITtime);         // a LOW is only 1 bit time period         
-      } 
+      IRcarrier(9000);            // 9ms of carrier
+      _delay_us(4500);            // 4.5ms of silence
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
+      _delay_us(BITtime);         // a LOW is only 1 bit time period
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
+      _delay_us(BITtime);         // a LOW is only 1 bit time period
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
+      _delay_us(BITtime);         // a LOW is only 1 bit time period
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
+      _delay_us(BITtime);         // a LOW is only 1 bit time period
+      IRcarrier(BITtime);         // turn on the carrier for one bit time
+      _delay_us(BITtime);         // a LOW is only 1 bit time period 
  }
-
 
