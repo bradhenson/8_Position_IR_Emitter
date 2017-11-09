@@ -15,7 +15,7 @@ void IRcarrier(void);
 int read_LCD_buttons(int);
 void xmitCodeHeader(void);
 
-#define BITtime   560                     // carrier signal standard time
+#define BITtime   550                     // carrier signal standard time
 #define btnRIGHT  0                       // Right button (not used currently)
 #define btnUP     1                       // Up button (used to enter into setup mode)
 #define btnDOWN   2                       // Down button (used to scroll through different routes)
@@ -41,8 +41,8 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 ***************************************************************************/
 void setup()
 {
-  DDRD = (1 << PIN);                        // Set pin 5 in PortD as an output
-  PORTD &= ~(0 << PIN);                      // Set pin 5 in PortD to 0
+  DDRD = (1 << PIN);                      // Set pin in PortD as an output
+  PORTD &= ~(0 << PIN);                   // Set pin in PortD to 0
   lcd.begin(16, 2);                       // start the library
   lcd.setCursor(0,1);                     // Set cursor to position zero on the second row
   lcd.print(F("                "));       // Clears the LCD row
@@ -274,12 +274,12 @@ int read_LCD_buttons()
 
 void IRcarrier(unsigned int timeinus)
 {
-  for(int i=0; i < (timeinus / 13); i++)
+  for(int i=0; i < (timeinus / 26); i++)
   {
     PORTD |= (1 << PIN);          // turn on Arduino pin
-    _delay_us(13);                //delay for 13us
+    _delay_us(13);                // delay for 13us
     PORTD &= ~(1 << PIN);         // turn off Arduino pin
-    _delay_us(13);                //delay for 13us
+    _delay_us(13);                // delay for 13us
   }
 }
 
@@ -329,8 +329,8 @@ void IRcarrier(unsigned int timeinus)
 
  void xmitCodeHeader()
  {
-      IRcarrier(9000);            // 9ms of carrier
-      _delay_us(4500);            // 4.5ms of silence
+      IRcarrier(8726);            // 9ms of carrier
+      _delay_us(4470);            // 4.5ms of silence
       IRcarrier(BITtime);         // turn on the carrier for one bit time
       _delay_us(BITtime);         // a LOW is only 1 bit time period
       IRcarrier(BITtime);         // turn on the carrier for one bit time
